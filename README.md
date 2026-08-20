@@ -16,12 +16,12 @@ Project này gồm:
 
 Sau bước này, web đã chạy được — nhưng **chưa có kho lưu trữ dùng chung**, vì `api/kv.js` cần một Vercel KV database để hoạt động. Nếu chưa làm bước 3, web sẽ tự động lưu tạm bằng `localStorage` (chỉ lưu riêng trên từng trình duyệt).
 
-## Bước 3 — Kết nối Vercel KV (để dữ liệu dùng chung cho mọi người)
+## Bước 3 — Kết nối Upstash for Redis (để dữ liệu dùng chung cho mọi người)
 1. Vào project vừa deploy trên Vercel → tab **Storage**.
-2. Chọn **Create Database → KV** (được cung cấp bởi Upstash, có gói miễn phí).
+2. Chọn **Create Database** → trong danh sách Marketplace chọn **Upstash for Redis** (có gói miễn phí). Lưu ý: có nhiều sản phẩm Upstash khác (Vector, QStash/Workflow, Search) — không chọn nhầm, chỉ chọn **"Upstash for Redis"**.
 3. Đặt tên bất kỳ, chọn vùng gần người dùng của bạn, bấm **Create**.
 4. Ở màn hình tiếp theo, chọn **Connect Project** → chọn đúng project này → xác nhận.
-   → Vercel sẽ tự động thêm các biến môi trường cần thiết (`KV_REST_API_URL`, `KV_REST_API_TOKEN`, v.v.) vào project, không cần bạn tự nhập.
+   → Vercel sẽ tự động thêm các biến môi trường cần thiết vào project (không cần bạn tự nhập).
 5. Vào tab **Deployments** → bấm **Redeploy** ở bản deploy mới nhất (để các biến môi trường mới có hiệu lực).
 
 ## Bước 4 — Kiểm tra
@@ -32,9 +32,9 @@ Sau bước này, web đã chạy được — nhưng **chưa có kho lưu trữ
 5. Thử thêm một từ vựng, sau đó mở web bằng trình duyệt/thiết bị khác — nếu thấy từ đó xuất hiện, nghĩa là dữ liệu đã dùng chung đúng như mong muốn.
 
 ### Nếu vẫn không kết nối được sau khi đã Connect + Redeploy
-- Vào Vercel → project → tab **Settings → Environment Variables**, kiểm tra có các biến bắt đầu bằng `KV_` (ví dụ `KV_REST_API_URL`, `KV_REST_API_TOKEN`) hay chưa. Nếu không có, quay lại tab Storage và Connect lại.
+- Vào Vercel → project → tab **Settings → Environment Variables**, kiểm tra có các biến `KV_REST_API_URL`/`KV_REST_API_TOKEN` hoặc `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN` hay chưa (tuỳ phiên bản tích hợp, code đã tự nhận diện cả hai kiểu). Nếu không thấy biến nào, quay lại tab Storage và Connect lại.
 - Vào tab **Deployments → (bản mới nhất) → Functions logs**, xem log của `api/kv.js` nếu có lỗi cụ thể.
-- Đảm bảo đã **Redeploy** sau khi Connect KV — biến môi trường chỉ có hiệu lực ở lần deploy sau khi được thêm vào.
+- Đảm bảo đã **Redeploy** sau khi Connect — biến môi trường chỉ có hiệu lực ở lần deploy sau khi được thêm vào.
 
 ## Lưu ý bảo mật
 - Mật khẩu admin được lưu ở dạng văn bản thường (không mã hoá) trong KV — phù hợp cho lớp học/nhóm nhỏ dùng nội bộ, **không phù hợp cho ứng dụng công khai có dữ liệu nhạy cảm**.
