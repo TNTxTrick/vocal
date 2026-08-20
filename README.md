@@ -26,9 +26,15 @@ Sau bước này, web đã chạy được — nhưng **chưa có kho lưu trữ
 
 ## Bước 4 — Kiểm tra
 1. Mở web đã deploy.
-2. Đăng nhập admin (`admin` / `admin123`), vào tab **Tài khoản admin** — nếu thấy dòng "Đã kết nối Vercel KV — dữ liệu lưu chung trên server" nghĩa là đã thành công.
-3. Đổi mật khẩu admin ngay để bảo mật.
-4. Thử thêm một từ vựng, sau đó mở web bằng trình duyệt/thiết bị khác — nếu thấy từ đó xuất hiện, nghĩa là dữ liệu đã dùng chung đúng như mong muốn.
+2. Đăng nhập admin (`admin` / `admin123`) hoặc vào bằng tên học viên bất kỳ — nếu thấy banner đỏ "Chưa kết nối kho lưu trữ dùng chung" ở đầu trang, nghĩa là KV chưa hoạt động.
+3. Sau khi làm xong bước 3 (Connect KV + Redeploy), quay lại trang và bấm nút **"Kiểm tra lại kết nối"** trên banner đó (không cần tải lại trang) — nếu chuyển sang thông báo thành công là đã xong.
+4. Đổi mật khẩu admin ngay để bảo mật (tab Tài khoản admin).
+5. Thử thêm một từ vựng, sau đó mở web bằng trình duyệt/thiết bị khác — nếu thấy từ đó xuất hiện, nghĩa là dữ liệu đã dùng chung đúng như mong muốn.
+
+### Nếu vẫn không kết nối được sau khi đã Connect + Redeploy
+- Vào Vercel → project → tab **Settings → Environment Variables**, kiểm tra có các biến bắt đầu bằng `KV_` (ví dụ `KV_REST_API_URL`, `KV_REST_API_TOKEN`) hay chưa. Nếu không có, quay lại tab Storage và Connect lại.
+- Vào tab **Deployments → (bản mới nhất) → Functions logs**, xem log của `api/kv.js` nếu có lỗi cụ thể.
+- Đảm bảo đã **Redeploy** sau khi Connect KV — biến môi trường chỉ có hiệu lực ở lần deploy sau khi được thêm vào.
 
 ## Lưu ý bảo mật
 - Mật khẩu admin được lưu ở dạng văn bản thường (không mã hoá) trong KV — phù hợp cho lớp học/nhóm nhỏ dùng nội bộ, **không phù hợp cho ứng dụng công khai có dữ liệu nhạy cảm**.

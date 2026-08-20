@@ -2,6 +2,7 @@
   "name": "hoc-tu-vung",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "Web hoc va kiem tra tu vung - luu du lieu chung qua Vercel KV",
   "dependencies": {
     "@vercel/kv": "^1.0.1"

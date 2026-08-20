@@ -624,8 +624,29 @@ function buildLogin(){
 // ---- admin screen ----
 function homeScreenFor(){ return state.session.role==='admin' ? 'admin' : 'student-home'; }
 
+function storageWarningBanner(){
+  if(HAS_CLOUD_STORAGE || BACKEND_AVAILABLE) return null;
+  return el('div',{class:'card', style:'border-color:var(--pink);margin-bottom:20px;'}, [
+    el('div',{style:'display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;'}, [
+      el('div',{}, [
+        el('h3',{style:'margin-bottom:6px;color:var(--pink);'}, '⚠ Chưa kết nối kho lưu trữ dùng chung'),
+        el('p',{class:'hint', style:'margin:0;max-width:520px;'}, 'Dữ liệu hiện chỉ lưu tạm trên trình duyệt này — các thiết bị khác sẽ không thấy từ vựng bạn thêm. Vào Vercel → tab Storage → tạo và Connect KV database → Redeploy, rồi bấm "Kiểm tra lại kết nối" bên dưới.'),
+      ]),
+      el('button',{class:'small', onclick: recheckBackend}, 'Kiểm tra lại kết nối'),
+    ]),
+  ]);
+}
+async function recheckBackend(){
+  setState({toast:'Đang kiểm tra kết nối…'});
+  const ok = await detectBackend();
+  BACKEND_AVAILABLE = ok;
+  setState({toast: ok ? 'Đã kết nối Vercel KV thành công!' : 'Vẫn chưa kết nối được — kiểm tra lại bước Connect KV trên Vercel.'});
+}
+
 function buildAdmin(){
   const frag = el('div',{});
+  const banner = storageWarningBanner();
+  if(banner) frag.appendChild(banner);
   const tabbar = el('div',{class:'tabbar'});
   let adminTab = buildAdmin._tab || 'words';
   const tabs = [['lessons','Bài học'],['words','Kho từ vựng'],['import','Nhập từ Google Sheet'],['account','Tài khoản admin']];
@@ -905,8 +926,13 @@ function buildAccountPanel(){
       ? 'Đã kết nối Vercel KV — dữ liệu lưu chung trên server, mọi người truy cập trang đều thấy cùng một kho từ.'
       : 'Chưa kết nối được backend (Vercel KV). Dữ liệu đang chỉ lưu tạm trên trình duyệt này (localStorage) — mỗi thiết bị/trình duyệt sẽ có kho từ riêng, không dùng chung được. Xem hướng dẫn kết nối Vercel KV trong file README.md của project.';
   const statusCard = el('div',{class:'card', style: BACKEND_AVAILABLE || HAS_CLOUD_STORAGE ? '' : 'border-color:var(--pink);'}, [
-    el('h3',{style:'margin-bottom:8px;'}, 'Trạng thái lưu trữ'),
-    el('p',{class:'hint', style:'margin:0;'}, statusLabel),
+    el('div',{style:'display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;'}, [
+      el('div',{}, [
+        el('h3',{style:'margin-bottom:8px;'}, 'Trạng thái lưu trữ'),
+        el('p',{class:'hint', style:'margin:0;max-width:520px;'}, statusLabel),
+      ]),
+      !HAS_CLOUD_STORAGE ? el('button',{class:'small', onclick: recheckBackend}, 'Kiểm tra lại kết nối') : null,
+    ]),
   ]);
   wrap.appendChild(statusCard);
 
@@ -954,6 +980,8 @@ function buildStreakCard(){
 
 function buildStudentHome(){
   const wrap = el('div',{});
+  const banner = storageWarningBanner();
+  if(banner) wrap.appendChild(banner);
   wrap.appendChild(buildStreakCard());
   const card = el('div',{class:'card'});
   card.appendChild(el('h2',{}, 'Bắt đầu luyện tập'));
