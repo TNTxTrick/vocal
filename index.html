@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sổ Tay Từ Vựng</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+:root{
+  --bg-grad-1:#eef2f9;
+  --bg-grad-2:#e2e9f5;
+  --bg-grad-3:#e9edf5;
+  --chalk:#1b2230;
+  --chalk-dim:#5c6478;
+  --yellow:#c8862c;
+  --pink:#d63f56;
+  --blue:#2f6fed;
+  --success:#1f9d5c;
+  --line: rgba(27,34,48,0.12);
+  --line-strong: rgba(27,34,48,0.22);
+  --danger:#d63f56;
+  --card-bg: rgba(255,255,255,0.55);
+  --card-bg-strong: rgba(255,255,255,0.72);
+  --card-border: rgba(255,255,255,0.75);
+  --field-bg: rgba(255,255,255,0.6);
+  --shadow: 0 8px 32px rgba(31,41,64,0.10);
+}
+:root[data-theme="dark"]{
+  --bg-grad-1:#0f1420;
+  --bg-grad-2:#141b2b;
+  --bg-grad-3:#10141f;
+  --chalk:#eef1f8;
+  --chalk-dim:#9aa3b8;
+  --yellow:#e3a94a;
+  --pink:#f16b7f;
+  --blue:#6d9bff;
+  --success:#4ad393;
+  --line: rgba(255,255,255,0.12);
+  --line-strong: rgba(255,255,255,0.22);
+  --danger:#f16b7f;
+  --card-bg: rgba(255,255,255,0.06);
+  --card-bg-strong: rgba(255,255,255,0.1);
+  --card-border: rgba(255,255,255,0.16);
+  --field-bg: rgba(255,255,255,0.07);
+  --shadow: 0 8px 32px rgba(0,0,0,0.35);
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at 15% 10%, var(--bg-grad-2), transparent 55%),
+    radial-gradient(circle at 85% 90%, var(--bg-grad-3), transparent 55%),
+    var(--bg-grad-1);
+  background-attachment:fixed;
+  color:var(--chalk);
+  font-family:'Inter', sans-serif;
+  min-height:100vh;
+  transition: background .25s ease, color .25s ease;
+}
+.wrap{max-width:960px;margin:0 auto;padding:32px 20px 80px;position:relative;}
+h1,h2,h3{font-family:'Inter',sans-serif;font-weight:700;margin:0;letter-spacing:-0.2px;}
+h1{font-size:30px;color:var(--chalk);}
+h2{font-size:22px;color:var(--chalk);}
+h3{font-size:18px;color:var(--chalk);}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--chalk-dim);}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--line);}
+.brand{display:flex;flex-direction:column;gap:2px;}
+.userbox{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--chalk-dim);}
+.userbox b{color:var(--chalk);font-weight:600;}
+button{
+  font-family:'Inter',sans-serif;
+  background:var(--card-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color:var(--chalk);
+  border:1px solid var(--card-border);
+  border-radius:10px;
+  padding:10px 18px;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all .15s ease;
+}
+button:hover{border-color:var(--blue);color:var(--blue);}
+button.primary{background:var(--blue);color:#ffffff;border-color:var(--blue);}
+button.primary:hover{background:var(--blue);opacity:0.9;color:#ffffff;}
+button.danger{border-color:var(--pink);color:var(--pink);}
+button.danger:hover{background:var(--pink);color:#ffffff;}
+button.small{padding:6px 12px;font-size:12px;}
+button:disabled{opacity:0.4;cursor:not-allowed;}
+.theme-toggle-wrap{position:fixed;top:20px;right:20px;z-index:60;}
+input,select,textarea{
+  font-family:'Inter',sans-serif;
+  background:var(--field-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border:1px solid var(--line);
+  border-radius:8px;
+  color:var(--chalk);
+  padding:11px 14px;
+  font-size:15px;
+  width:100%;
+}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);}
+label{font-size:13px;color:var(--chalk-dim);font-weight:600;display:block;margin-bottom:6px;}
+.card{
+  background:var(--card-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border:1px solid var(--card-border);
+  border-radius:16px;
+  padding:28px;
+  margin-bottom:22px;
+  box-shadow: var(--shadow);
+}
+.field{margin-bottom:16px;}
+.row{display:flex;gap:14px;}
+.row>*{flex:1;}
+.error-text{color:var(--pink);font-size:13px;margin-top:6px;}
+.hint{font-size:13px;color:var(--chalk-dim);margin-top:6px;line-height:1.5;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:640px){.grid2{grid-template-columns:1fr;}.row{flex-direction:column;}}
+
+/* login */
+.login-screen{display:flex;align-items:center;justify-content:center;min-height:70vh;}
+.login-card{width:100%;max-width:420px;text-align:center;}
+.login-tabs{display:flex;gap:8px;justify-content:center;margin-bottom:24px;}
+.login-tabs button{flex:1;}
+.login-tabs button.active{border-color:var(--blue);color:var(--blue);}
+
+/* nav */
+.tabbar{display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap;}
+.tabbar button.active{border-color:var(--blue);color:var(--blue);}
+
+/* vocab list */
+.vocab-row{display:flex;align-items:center;justify-content:space-between;padding:12px 4px;border-bottom:1px solid var(--line);}
+.vocab-row:last-child{border-bottom:none;}
+.vocab-word{font-weight:600;font-size:16px;}
+.vocab-meaning{color:var(--chalk-dim);font-size:14px;}
+.empty{text-align:center;padding:40px 20px;color:var(--chalk-dim);}
+.empty i{font-family:'Inter',sans-serif;font-style:normal;font-weight:600;font-size:16px;color:var(--chalk);}
+
+/* quiz */
+.quiz-progress{display:flex;align-items:center;gap:10px;margin-bottom:18px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--chalk-dim);}
+.progress-bar{flex:1;height:6px;background:var(--field-bg);border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--blue);border-radius:3px;transition:width .3s ease;}
+.question-card{text-align:center;padding:44px 28px;}
+.question-word{font-family:'Inter',sans-serif;font-weight:700;font-size:38px;color:var(--chalk);letter-spacing:1px;margin-bottom:10px;word-break:break-word;}
+.question-sub{color:var(--chalk-dim);font-size:14px;margin-bottom:28px;}
+.blank-input{
+  font-family:'JetBrains Mono',monospace;
+  font-size:22px;
+  text-align:center;
+  letter-spacing:3px;
+  max-width:320px;
+  margin:0 auto;
+  display:block;
+}
+.mc-options{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px;}
+@media(max-width:520px){.mc-options{grid-template-columns:1fr;}}
+.mc-btn{
+  padding:16px 18px;
+  text-align:left;
+  font-size:15px;
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+.mc-letter{font-family:'JetBrains Mono',monospace;color:var(--blue);font-weight:600;}
+.mc-btn.correct{border-color:var(--success);background:rgba(31,157,92,0.12);color:var(--success);}
+.mc-btn.wrong{border-color:var(--pink);background:rgba(214,63,86,0.12);color:var(--pink);}
+.feedback{margin-top:20px;font-size:15px;font-weight:600;min-height:24px;}
+.feedback.correct{color:var(--success);}
+.feedback.wrong{color:var(--pink);}
+.scribble{display:inline-block;width:20px;height:20px;vertical-align:-4px;margin-right:6px;}
+
+/* result */
+.result-score{font-family:'Inter',sans-serif;font-weight:800;font-size:56px;color:var(--chalk);text-align:center;margin-bottom:4px;}
+.result-sub{text-align:center;color:var(--chalk-dim);margin-bottom:28px;}
+.review-item{display:flex;justify-content:space-between;gap:12px;padding:10px 4px;border-bottom:1px solid var(--line);font-size:14px;}
+.review-item .badge{font-size:12px;padding:2px 8px;border-radius:6px;font-weight:600;}
+.badge.correct{background:rgba(31,157,92,0.15);color:var(--success);}
+.badge.wrong{background:rgba(214,63,86,0.15);color:var(--pink);}
+
+.import-box{border:1px dashed var(--line-strong);border-radius:12px;padding:20px;margin-top:8px;background:var(--card-bg-strong);}
+.pill{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--field-bg);border:1px solid var(--line);padding:4px 10px;border-radius:6px;color:var(--chalk-dim);margin-right:8px;}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:8px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:var(--card-bg-strong);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border:1px solid var(--card-border);color:var(--chalk);padding:12px 22px;border-radius:12px;font-size:14px;z-index:50;box-shadow: var(--shadow);
+}
+
+/* streak */
+.streak-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--card-bg);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border:1px solid var(--card-border);border-radius:20px;padding:6px 14px;
+  font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--chalk);white-space:nowrap;
+}
+.streak-card{
+  display:flex;align-items:center;gap:20px;
+  background:var(--card-bg);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border:1px solid var(--card-border);border-radius:14px;padding:20px 24px;margin-bottom:22px;
+  box-shadow: var(--shadow);
+}
+.streak-flame{font-size:36px;line-height:1;}
+.streak-num{font-family:'Inter',sans-serif;font-weight:700;font-size:26px;color:var(--chalk);line-height:1;}
+.streak-label{color:var(--chalk-dim);font-size:13px;margin-top:4px;}
+.streak-longest{margin-left:auto;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--chalk-dim);}
+
+/* modal (thay cho confirm()/prompt() của trình duyệt, vốn hay bị chặn trong iframe) */
+.modal-overlay{
+  position:fixed;inset:0;z-index:100;
+  background:rgba(10,14,22,0.45);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+}
+.modal-box{max-width:420px;width:100%;margin:0;}
+.modal-box p{margin:0 0 22px;line-height:1.6;font-size:15px;color:var(--chalk);}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;}
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script>
+// ---------- storage helpers ----------
+// Thứ tự ưu tiên:
+// 1) window.storage — khi chạy trong artifact của Claude.ai
+// 2) /api/kv (Vercel KV) — khi deploy lên Vercel, dữ liệu dùng chung cho mọi người
+// 3) localStorage — phương án dự phòng cuối cùng, chỉ lưu riêng trên trình duyệt hiện tại
+const HAS_CLOUD_STORAGE = (typeof window !== 'undefined' && !!window.storage);
+let BACKEND_AVAILABLE = false;
+let _clientId = null;
+
+function lsKey(key, shared){ return 'vocabapp:' + (shared ? 'shared:' : 'user:') + key; }
+
+function getClientId(){
+  if(_clientId) return _clientId;
+  try{
+    _clientId = localStorage.getItem('vocabapp:clientId');
+    if(!_clientId){
+      _clientId = 'c-' + Math.random().toString(36).slice(2) + '-' + Date.now().toString(36);
+      localStorage.setItem('vocabapp:clientId', _clientId);
+    }
+  }catch(e){ _clientId = 'c-fallback'; }
+  return _clientId;
+}
+
+async function detectBackend(){
+  if(HAS_CLOUD_STORAGE) return false; // Claude storage takes priority, no need for API
+  try{
+    const res = await fetch('/api/kv?key=__health__&shared=true');
+    return res.ok;
+  }catch(e){ return false; }
+}
+
+async function apiGet(key, shared){
+  const params = new URLSearchParams({key, shared: String(!!shared), clientId: getClientId()});
+  const res = await fetch('/api/kv?' + params.toString());
+  if(!res.ok) throw new Error('api-get-failed');
+  const data = await res.json();
+  return data.value === undefined ? null : data.value;
+}
+async function apiSet(key, value, shared){
+  const res = await fetch('/api/kv', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({key, value, shared: !!shared, clientId: getClientId()})
+  });
+  if(!res.ok) throw new Error('api-set-failed');
+}
+async function apiDel(key, shared){
+  const params = new URLSearchParams({key, shared: String(!!shared), clientId: getClientId()});
+  const res = await fetch('/api/kv?' + params.toString(), {method:'DELETE'});
+  if(!res.ok) throw new Error('api-del-failed');
+}
+
+async function sget(key, shared){
+  if(HAS_CLOUD_STORAGE){
+    try{ const r = await window.storage.get(key, !!shared); return r ? r.value : null; }
+    catch(e){ return null; }
+  }
+  if(BACKEND_AVAILABLE){
+    try{ return await apiGet(key, shared); }
+    catch(e){ /* fall through to localStorage below */ }
+  }
+  try{ return localStorage.getItem(lsKey(key, shared)); }
+  catch(e){ return null; }
+}
+async function sset(key, value, shared){
+  if(HAS_CLOUD_STORAGE){
+    try{ await window.storage.set(key, value, !!shared); return true; }
+    catch(e){ return false; }
+  }
+  if(BACKEND_AVAILABLE){
+    try{ await apiSet(key, value, shared); return true; }
+    catch(e){ /* fall through to localStorage below */ }
+  }
+  try{ localStorage.setItem(lsKey(key, shared), value); return true; }
+  catch(e){ return false; }
+}
+async function sdel(key, shared){
+  if(HAS_CLOUD_STORAGE){
+    try{ await window.storage.delete(key, !!shared); }
+    catch(e){}
+    return;
+  }
+  if(BACKEND_AVAILABLE){
+    try{ await apiDel(key, shared); return; }
+    catch(e){ /* fall through to localStorage below */ }
+  }
+  try{ localStorage.removeItem(lsKey(key, shared)); }
+  catch(e){}
+}
+
+// ---------- state ----------
+const state = {
+  session: null,      // {role:'admin'|'student', name}
+  vocab: [],
+  lessons: [],        // [{id, name, createdAt}]
+  screen: 'loading',  // login, admin, student-home, quiz-setup, quiz, result
+  quizMode: null,     // 'blank' | 'mc'
+  quizWords: [],
+  quizIndex: 0,
+  quizAnswers: [],
+  currentInput: '',
+  currentMc: null,
+  answered: false,
+  toast: null,
+  streak: {current:0, longest:0, lastDate:null},
+  theme: 'light',
+  selectedLessonId: '__all__',
+  modal: null,
+};
+
+const root = document.getElementById('root');
+function render(){
+  document.documentElement.setAttribute('data-theme', state.theme);
+  root.innerHTML = '';
+  root.appendChild(themeToggleWrap());
+  root.appendChild(buildView());
+  if(state.modal){ root.appendChild(buildModal()); }
+  if(state.toast){ showToastEl(state.toast); }
+}
+function setState(patch){ Object.assign(state, patch); render(); }
+
+function openConfirm(message, onConfirm, confirmLabel){
+  state.modal = {message, onConfirm, confirmLabel: confirmLabel || 'Xác nhận xoá'};
+  render();
+}
+function closeModal(){ state.modal = null; render(); }
+function buildModal(){
+  const m = state.modal;
+  const overlay = el('div',{class:'modal-overlay'});
+  overlay.addEventListener('click', (e)=>{ if(e.target===overlay) closeModal(); });
+  const box = el('div',{class:'modal-box card'});
+  box.appendChild(el('p',{}, m.message));
+  const actions = el('div',{class:'modal-actions'});
+  actions.appendChild(el('button',{onclick: closeModal}, 'Huỷ'));
+  const okBtn = el('button',{class:'danger'}, m.confirmLabel);
+  okBtn.addEventListener('click', ()=>{
+    const cb = m.onConfirm;
+    closeModal();
+    if(cb) cb();
+  });
+  actions.appendChild(okBtn);
+  box.appendChild(actions);
+  overlay.appendChild(box);
+  return overlay;
+}
+
+function themeToggleWrap(){
+  const wrap = el('div',{class:'theme-toggle-wrap'});
+  const btn = el('button',{class:'small', onclick: toggleTheme},
+    state.theme==='dark' ? '☀️ Chế độ sáng' : '🌙 Chế độ tối');
+  wrap.appendChild(btn);
+  return wrap;
+}
+async function toggleTheme(){
+  state.theme = state.theme==='dark' ? 'light' : 'dark';
+  await sset('theme-preference', state.theme, false);
+  render();
+}
+
+function showToastEl(msg){
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(()=>{ el.remove(); if(state.toast===msg) state.toast=null; }, 2600);
+}
+
+function el(tag, attrs={}, children=[]){
+  const e = document.createElement(tag);
+  for(const [k,v] of Object.entries(attrs)){
+    if(k==='class') e.className = v;
+    else if(k==='html') e.innerHTML = v;
+    else if(k.startsWith('on') && typeof v === 'function') e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v);
+  }
+  (Array.isArray(children)?children:[children]).forEach(c=>{
+    if(c===null||c===undefined) return;
+    if(typeof c === 'string') e.appendChild(document.createTextNode(c));
+    else e.appendChild(c);
+  });
+  return e;
+}
+
+// ---------- init ----------
+async function init(){
+  BACKEND_AVAILABLE = await detectBackend();
+  const savedTheme = await sget('theme-preference', false);
+  if(savedTheme==='light' || savedTheme==='dark'){
+    state.theme = savedTheme;
+  } else {
+    state.theme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  }
+  const savedSession = await sget('current-session', false);
+  if(savedSession){
+    try{ state.session = JSON.parse(savedSession); }catch(e){}
+  }
+  await loadLessons();
+  await loadVocab();
+  if(!await sget('admin-account', true)){
+    await sset('admin-account', JSON.stringify({username:'admin', password:'admin123'}), true);
+  }
+  if(state.session){ await loadStreak(); }
+  state.screen = state.session ? (state.session.role==='admin' ? 'admin' : 'student-home') : 'login';
+  render();
+}
+const UNSORTED_LESSON_ID = 'unsorted';
+async function loadLessons(){
+  const raw = await sget('lessons-list', true);
+  state.lessons = raw ? JSON.parse(raw) : [];
+}
+async function saveLessons(){
+  await sset('lessons-list', JSON.stringify(state.lessons), true);
+}
+async function loadVocab(){
+  const raw = await sget('vocab-bank', true);
+  let list = raw ? JSON.parse(raw) : [];
+  // di cư dữ liệu cũ: từ nào chưa có lessonId thì gán vào bài "Chưa phân loại"
+  let needsMigration = false;
+  list = list.map(v=>{
+    if(!v.lessonId){ needsMigration = true; return Object.assign({}, v, {lessonId: UNSORTED_LESSON_ID}); }
+    return v;
+  });
+  if(needsMigration && !state.lessons.some(l=>l.id===UNSORTED_LESSON_ID)){
+    state.lessons.push({id: UNSORTED_LESSON_ID, name:'Chưa phân loại', createdAt: Date.now()});
+    await saveLessons();
+  }
+  state.vocab = list;
+  if(needsMigration) await saveVocab();
+}
+async function saveVocab(){
+  await sset('vocab-bank', JSON.stringify(state.vocab), true);
+}
+function lessonName(id){
+  const l = state.lessons.find(x=>x.id===id);
+  return l ? l.name : 'Chưa phân loại';
+}
+function wordsInLesson(id){
+  return state.vocab.filter(v=> id==='__all__' ? true : v.lessonId===id);
+}
+
+// ---------- streak helpers ----------
+function todayStr(d){
+  d = d || new Date();
+  const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+day;
+}
+function daysDiff(a, b){
+  const da = new Date(a+'T00:00:00');
+  const db = new Date(b+'T00:00:00');
+  return Math.round((db-da)/86400000);
+}
+async function loadStreak(){
+  if(!state.session){ return; }
+  const raw = await sget('streak:'+state.session.name, true);
+  state.streak = raw ? JSON.parse(raw) : {current:0, longest:0, lastDate:null};
+}
+async function bumpStreak(){
+  const today = todayStr();
+  const s = Object.assign({current:0, longest:0, lastDate:null}, state.streak);
+  if(s.lastDate === today){
+    // already practiced today, keep as is
+  } else if(s.lastDate && daysDiff(s.lastDate, today) === 1){
+    s.current = (s.current||0) + 1;
+  } else {
+    s.current = 1;
+  }
+  s.longest = Math.max(s.longest||0, s.current);
+  s.lastDate = today;
+  state.streak = s;
+  await sset('streak:'+state.session.name, JSON.stringify(s), true);
+}
+function displayStreak(){
+  const s = state.streak || {current:0, longest:0, lastDate:null};
+  if(!s.lastDate) return {current:0, longest:s.longest||0, practicedToday:false};
+  const today = todayStr();
+  const gap = daysDiff(s.lastDate, today);
+  if(gap > 1) return {current:0, longest:s.longest||0, practicedToday:false};
+  return {current:s.current||0, longest:s.longest||0, practicedToday: gap===0};
+}
+function streakBadge(){
+  const d = displayStreak();
+  return el('div',{class:'streak-pill'}, [
+    el('span',{}, '🔥'),
+    el('span',{}, d.current+' ngày'),
+  ]);
+}
+
+// ---------- views ----------
+function buildView(){
+  const container = el('div', {class:'wrap'});
+  if(state.screen === 'loading'){
+    container.appendChild(el('div',{class:'empty'}, [el('span',{html:'<i>Đang mở sổ tay…</i>'})]));
+    return container;
+  }
+  if(state.screen === 'login'){
+    return buildLogin();
+  }
+  container.appendChild(buildTop());
+  if(state.screen==='admin') container.appendChild(buildAdmin());
+  else if(state.screen==='student-home') container.appendChild(buildStudentHome());
+  else if(state.screen==='lesson-pick') container.appendChild(buildLessonPick());
+  else if(state.screen==='quiz-setup') container.appendChild(buildQuizSetup());
+  else if(state.screen==='quiz') container.appendChild(buildQuiz());
+  else if(state.screen==='result') container.appendChild(buildResult());
+  return container;
+}
+
+function buildTop(){
+  const top = el('div',{class:'top'});
+  const brand = el('div',{class:'brand'}, [
+    el('span',{class:'eyebrow'}, 'Sổ tay từ vựng'),
+    el('h1',{}, state.session.role==='admin' ? 'Bảng quản trị' : 'Phòng luyện tập'),
+  ]);
+  const userbox = el('div',{class:'userbox'}, [
+    streakBadge(),
+    el('span',{}, [document.createTextNode('Xin chào, '), el('b',{}, state.session.name)]),
+    el('button',{class:'small', onclick: logout}, 'Đăng xuất'),
+  ]);
+  top.appendChild(brand);
+  top.appendChild(userbox);
+  return top;
+}
+
+async function logout(){
+  await sdel('current-session', false);
+  setState({session:null, screen:'login'});
+}
+
+// ---- login screen ----
+let loginTab = 'student';
+function buildLogin(){
+  const wrap = el('div',{class:'wrap login-screen'});
+  const card = el('div',{class:'card login-card'});
+  card.appendChild(el('span',{class:'eyebrow'},'Chào mừng trở lại'));
+  card.appendChild(el('h1',{}, 'Sổ Tay Từ Vựng'));
+  card.appendChild(el('p',{class:'hint', style:'margin:10px 0 22px;'}, 'Học từ mới, tự kiểm tra, ghi nhớ lâu hơn mỗi ngày.'));
+
+  const tabs = el('div',{class:'login-tabs'});
+  const studentTabBtn = el('button',{class: loginTab==='student'?'active':'', onclick: ()=>{loginTab='student'; render();}}, 'Học viên');
+  const adminTabBtn = el('button',{class: loginTab==='admin'?'active':'', onclick: ()=>{loginTab='admin'; render();}}, 'Quản trị viên');
+  tabs.appendChild(studentTabBtn); tabs.appendChild(adminTabBtn);
+  card.appendChild(tabs);
+
+  if(loginTab==='student'){
+    const nameInput = el('input',{type:'text', placeholder:'Tên hiển thị của bạn'});
+    const errBox = el('div',{class:'error-text', style:'display:none;'});
+    const field = el('div',{class:'field'}, [nameInput, errBox]);
+    card.appendChild(field);
+    const btn = el('button',{class:'primary', style:'width:100%;'}, 'Vào học');
+    btn.addEventListener('click', async ()=>{
+      const name = nameInput.value.trim();
+      if(!name){ errBox.textContent = 'Nhập tên để bắt đầu học.'; errBox.style.display='block'; return; }
+      const session = {role:'student', name};
+      await sset('current-session', JSON.stringify(session), false);
+      state.session = session;
+      await loadStreak();
+      setState({session, screen:'student-home'});
+    });
+    card.appendChild(btn);
+    card.appendChild(el('p',{class:'hint', style:'margin-top:16px;'}, 'Không cần mật khẩu — chỉ cần một cái tên để lưu kết quả luyện tập.'));
+  } else {
+    const userInput = el('input',{type:'text', placeholder:'Tên đăng nhập'});
+    const passInput = el('input',{type:'password', placeholder:'Mật khẩu'});
+    const errBox = el('div',{class:'error-text', style:'display:none;'});
+    card.appendChild(el('div',{class:'field'}, [userInput]));
+    card.appendChild(el('div',{class:'field'}, [passInput, errBox]));
+    const btn = el('button',{class:'primary', style:'width:100%;'}, 'Đăng nhập');
+    btn.addEventListener('click', async ()=>{
+      const u = userInput.value.trim(); const p = passInput.value;
+      if(!u || !p){ errBox.textContent='Nhập đầy đủ tên đăng nhập và mật khẩu.'; errBox.style.display='block'; return; }
+      const accRaw = await sget('admin-account', true);
+      const acc = accRaw ? JSON.parse(accRaw) : {username:'admin', password:'admin123'};
+      if(u===acc.username && p===acc.password){
+        const session = {role:'admin', name:u};
+        await sset('current-session', JSON.stringify(session), false);
+        state.session = session;
+        await loadStreak();
+        setState({session, screen:'admin'});
+      } else {
+        errBox.textContent = 'Sai tên đăng nhập hoặc mật khẩu.'; errBox.style.display='block';
+      }
+    });
+    card.appendChild(btn);
+    card.appendChild(el('p',{class:'hint', style:'margin-top:16px;'}, 'Mặc định: admin / admin123 (đổi mật khẩu trong bảng quản trị sau khi đăng nhập). Lưu ý: tài khoản này dùng chung cho mọi người mở trang, phù hợp cho lớp học hoặc nhóm nhỏ, không phải hệ thống bảo mật cấp doanh nghiệp.'));
+  }
+  wrap.appendChild(card);
+  return wrap;
+}
+
+// ---- admin screen ----
+function homeScreenFor(){ return state.session.role==='admin' ? 'admin' : 'student-home'; }
+
+function buildAdmin(){
+  const frag = el('div',{});
+  const tabbar = el('div',{class:'tabbar'});
+  let adminTab = buildAdmin._tab || 'words';
+  const tabs = [['lessons','Bài học'],['words','Kho từ vựng'],['import','Nhập từ Google Sheet'],['account','Tài khoản admin']];
+  tabs.forEach(([key,label])=>{
+    tabbar.appendChild(el('button',{class: adminTab===key?'active':'', onclick:()=>{buildAdmin._tab=key; render();}}, label));
+  });
+  tabbar.appendChild(el('button',{class:'primary', onclick:()=>setState({screen:'lesson-pick'})}, 'Kiểm tra từ vựng'));
+  frag.appendChild(tabbar);
+
+  if(adminTab==='lessons') frag.appendChild(buildLessonsPanel());
+  else if(adminTab==='words') frag.appendChild(buildWordsPanel());
+  else if(adminTab==='import') frag.appendChild(buildImportPanel());
+  else frag.appendChild(buildAccountPanel());
+  return frag;
+}
+
+function buildLessonsPanel(){
+  const wrap = el('div',{});
+  const card = el('div',{class:'card'});
+  card.appendChild(el('h2',{}, 'Tạo bài học mới'));
+  card.appendChild(el('p',{class:'hint'}, 'Mỗi bài học là một nhóm từ vựng riêng (ví dụ: "Bài 1", "Chủ đề Gia đình"...) để học viên luyện tập tách biệt cho dễ nhớ.'));
+  const nameInput = el('input',{type:'text', placeholder:'Tên bài học (ví dụ: Bài 1)', style:'margin-top:10px;'});
+  const errBox = el('div',{class:'error-text', style:'display:none;'});
+  card.appendChild(el('div',{class:'field', style:'margin-top:10px;'}, [nameInput, errBox]));
+  const addBtn = el('button',{class:'primary'}, 'Tạo bài học');
+  addBtn.addEventListener('click', async ()=>{
+    const name = nameInput.value.trim();
+    if(!name){ errBox.textContent='Nhập tên bài học trước khi tạo.'; errBox.style.display='block'; return; }
+    if(state.lessons.some(l=>l.name.toLowerCase()===name.toLowerCase())){ errBox.textContent='Đã có bài học trùng tên.'; errBox.style.display='block'; return; }
+    errBox.style.display='none';
+    const lesson = {id: 'l-'+Date.now()+'-'+Math.random().toString(36).slice(2,6), name, createdAt: Date.now()};
+    state.lessons.push(lesson);
+    await saveLessons();
+    nameInput.value='';
+    setState({toast:'Đã tạo bài học "'+name+'".'});
+  });
+  card.appendChild(addBtn);
+  wrap.appendChild(card);
+
+  const listCard = el('div',{class:'card'});
+  listCard.appendChild(el('h2',{style:'margin-bottom:10px;'}, 'Danh sách bài học (' + state.lessons.length + ')'));
+  if(state.lessons.length===0){
+    listCard.appendChild(el('div',{class:'empty'}, [el('span',{html:'<i>Chưa có bài học nào. Tạo bài học ở trên để bắt đầu sắp xếp từ vựng.</i>'})]));
+  } else {
+    if(buildLessonsPanel._editingId===undefined) buildLessonsPanel._editingId = null;
+    state.lessons.slice().sort((a,b)=>a.createdAt-b.createdAt).forEach(lesson=>{
+      const count = wordsInLesson(lesson.id).length;
+      let row;
+      if(buildLessonsPanel._editingId === lesson.id){
+        const renameInput = el('input',{type:'text', value:lesson.name, style:'max-width:240px;'});
+        const renameErr = el('div',{class:'error-text', style:'display:none;margin-top:4px;'});
+        const saveRename = async ()=>{
+          const newName = renameInput.value.trim();
+          if(!newName){ renameErr.textContent='Tên bài học không được để trống.'; renameErr.style.display='block'; return; }
+          if(state.lessons.some(l=>l.id!==lesson.id && l.name.toLowerCase()===newName.toLowerCase())){
+            renameErr.textContent='Đã có bài học khác trùng tên.'; renameErr.style.display='block'; return;
+          }
+          lesson.name = newName;
+          await saveLessons();
+          buildLessonsPanel._editingId = null;
+          setState({toast:'Đã đổi tên bài học.'});
+        };
+        renameInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') saveRename(); if(e.key==='Escape'){ buildLessonsPanel._editingId=null; render(); } });
+        row = el('div',{class:'vocab-row', style:'align-items:flex-start;'}, [
+          el('div',{style:'flex:1;max-width:280px;'}, [renameInput, renameErr]),
+          el('div',{style:'display:flex;gap:8px;'}, [
+            el('button',{class:'primary small', onclick: saveRename}, 'Lưu'),
+            el('button',{class:'small', onclick:()=>{ buildLessonsPanel._editingId=null; render(); }}, 'Huỷ'),
+          ]),
+        ]);
+        setTimeout(()=>{ renameInput.focus(); renameInput.select(); }, 0);
+      } else {
+        row = el('div',{class:'vocab-row'}, [
+          el('div',{}, [
+            el('span',{class:'vocab-word'}, lesson.name),
+            el('div',{class:'vocab-meaning'}, count + ' từ'),
+          ]),
+          el('div',{style:'display:flex;gap:8px;'}, [
+            el('button',{class:'small', onclick:()=>{ buildLessonsPanel._editingId = lesson.id; render(); }}, 'Đổi tên'),
+            lesson.id!==UNSORTED_LESSON_ID ? el('button',{class:'danger small', onclick:()=>{
+              openConfirm(
+                'Xoá bài học "'+lesson.name+'"? '+count+' từ trong bài sẽ được chuyển sang "Chưa phân loại".',
+                async ()=>{
+                  state.vocab.forEach(v=>{ if(v.lessonId===lesson.id) v.lessonId = UNSORTED_LESSON_ID; });
+                  if(!state.lessons.some(l=>l.id===UNSORTED_LESSON_ID)){
+                    state.lessons.push({id: UNSORTED_LESSON_ID, name:'Chưa phân loại', createdAt: Date.now()});
+                  }
+                  state.lessons = state.lessons.filter(l=>l.id!==lesson.id);
+                  await saveLessons(); await saveVocab();
+                  setState({toast:'Đã xoá bài học "'+lesson.name+'".'});
+                }
+              );
+            }}, 'Xoá') : el('span',{}),
+          ]),
+        ]);
+      }
+      listCard.appendChild(row);
+    });
+  }
+  wrap.appendChild(listCard);
+  return wrap;
+}
+
+function buildWordsPanel(){
+  if(buildWordsPanel._filter===undefined) buildWordsPanel._filter = '__all__';
+  const card = el('div',{class:'card'});
+  card.appendChild(el('h2',{}, 'Thêm từ mới'));
+  if(state.lessons.length===0){
+    card.appendChild(el('p',{class:'hint', style:'margin-top:8px;'}, 'Chưa có bài học nào — hãy tạo bài học ở tab "Bài học" trước, hoặc thêm từ trực tiếp (sẽ được xếp vào "Chưa phân loại").'));
+  }
+  const wordInput = el('input',{type:'text', placeholder:'Từ vựng (ví dụ: apple)'});
+  const meaningInput = el('input',{type:'text', placeholder:'Nghĩa tiếng Việt (ví dụ: quả táo)'});
+  const errBox = el('div',{class:'error-text', style:'display:none;'});
+  card.appendChild(el('div',{class:'row', style:'margin-bottom:8px;'}, [
+    el('div',{}, [el('label',{},'Từ'), wordInput]),
+    el('div',{}, [el('label',{},'Nghĩa'), meaningInput]),
+  ]));
+  const lessonSelect = el('select',{});
+  const lessonOptions = state.lessons.length ? state.lessons : [{id:UNSORTED_LESSON_ID, name:'Chưa phân loại'}];
+  lessonOptions.forEach(l=> lessonSelect.appendChild(el('option',{value:l.id}, l.name)));
+  card.appendChild(el('div',{class:'field'}, [el('label',{},'Thêm vào bài học'), lessonSelect]));
+  card.appendChild(errBox);
+  const addBtn = el('button',{class:'primary', style:'margin-top:4px;'}, 'Thêm vào kho từ');
+  addBtn.addEventListener('click', async ()=>{
+    const w = wordInput.value.trim(); const m = meaningInput.value.trim();
+    if(!w || !m){ errBox.textContent='Nhập cả từ và nghĩa trước khi thêm.'; errBox.style.display='block'; return; }
+    errBox.style.display='none';
+    const lessonId = lessonSelect.value || UNSORTED_LESSON_ID;
+    if(!state.lessons.some(l=>l.id===lessonId)){
+      state.lessons.push({id: UNSORTED_LESSON_ID, name:'Chưa phân loại', createdAt: Date.now()});
+      await saveLessons();
+    }
+    state.vocab.push({id: Date.now()+'-'+Math.random().toString(36).slice(2,7), word:w, meaning:m, lessonId});
+    await saveVocab();
+    wordInput.value=''; meaningInput.value='';
+    setState({toast:'Đã thêm "'+w+'" vào '+lessonName(lessonId)+'.'});
+  });
+  card.appendChild(addBtn);
+
+  const listCard = el('div',{class:'card'});
+  const filterSelect = el('select',{style:'max-width:220px;'});
+  filterSelect.appendChild(el('option',{value:'__all__'}, 'Tất cả bài học'));
+  state.lessons.forEach(l=> filterSelect.appendChild(el('option',{value:l.id}, l.name)));
+  filterSelect.value = buildWordsPanel._filter;
+  filterSelect.addEventListener('change', ()=>{ buildWordsPanel._filter = filterSelect.value; render(); });
+
+  const filtered = wordsInLesson(buildWordsPanel._filter);
+  listCard.appendChild(el('div',{style:'display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:12px;flex-wrap:wrap;'}, [
+    el('h2',{}, 'Kho từ (' + filtered.length + ')'),
+    el('div',{style:'display:flex;gap:8px;align-items:center;'}, [
+      filterSelect,
+      filtered.length ? el('button',{class:'danger small', onclick:()=>{
+        const label = buildWordsPanel._filter==='__all__' ? 'toàn bộ kho từ vựng' : 'từ trong bài "'+lessonName(buildWordsPanel._filter)+'"';
+        openConfirm('Xoá '+label+'? Không thể hoàn tác.', async ()=>{
+          const idsToRemove = new Set(filtered.map(v=>v.id));
+          state.vocab = state.vocab.filter(v=>!idsToRemove.has(v.id));
+          await saveVocab(); setState({toast:'Đã xoá '+label+'.'});
+        });
+      }}, 'Xoá mục đang lọc') : el('span',{}),
+    ]),
+  ]));
+  if(filtered.length===0){
+    listCard.appendChild(el('div',{class:'empty'}, [el('span',{html:'<i>Chưa có từ nào trong mục này. Hãy thêm từ ở trên hoặc nhập từ Google Sheet.</i>'})]));
+  } else {
+    filtered.slice().reverse().forEach(v=>{
+      const row = el('div',{class:'vocab-row'}, [
+        el('div',{}, [
+          el('div',{class:'vocab-word'}, v.word),
+          el('div',{class:'vocab-meaning'}, v.meaning + (buildWordsPanel._filter==='__all__' ? '  ·  ' + lessonName(v.lessonId) : '')),
+        ]),
+        el('button',{class:'danger small', onclick: async ()=>{
+          state.vocab = state.vocab.filter(x=>x.id!==v.id);
+          await saveVocab(); setState({toast:'Đã xoá "'+v.word+'".'});
+        }}, 'Xoá'),
+      ]);
+      listCard.appendChild(row);
+    });
+  }
+  const wrap = el('div',{}); wrap.appendChild(card); wrap.appendChild(listCard);
+  return wrap;
+}
+
+function parseAndAddRows(rows, lessonId){
+  let added = 0, skipped = 0;
+  rows.forEach((r, idx)=>{
+    const w = (r[0]||'').toString().trim();
+    const m = (r[1]||'').toString().trim();
+    if(!w || !m){ return; }
+    const lw = w.toLowerCase();
+    if(idx===0 && ['word','từ','tu','vocabulary','tiếng anh'].includes(lw)){ return; }
+    if(state.vocab.some(x=>x.word.toLowerCase()===lw && x.lessonId===lessonId)){ skipped++; return; }
+    state.vocab.push({id: Date.now()+'-'+Math.random().toString(36).slice(2,7)+added, word:w, meaning:m, lessonId});
+    added++;
+  });
+  return {added, skipped};
+}
+
+function buildImportPanel(){
+  const card = el('div',{class:'card'});
+  card.appendChild(el('h2',{}, 'Nhập từ vựng từ Google Sheet'));
+  card.appendChild(el('p',{class:'hint'}, 'Trình duyệt không cho phép trang này tự tải trực tiếp từ Google (giới hạn bảo mật của môi trường), nên hãy dùng 1 trong 2 cách chắc chắn hoạt động dưới đây. Cột đầu tiên là từ vựng, cột thứ hai là nghĩa tiếng Việt.'));
+
+  const lessonSelect = el('select',{style:'margin-top:10px;'});
+  const lessonOptions = state.lessons.length ? state.lessons : [{id:UNSORTED_LESSON_ID, name:'Chưa phân loại'}];
+  lessonOptions.forEach(l=> lessonSelect.appendChild(el('option',{value:l.id}, l.name)));
+  card.appendChild(el('div',{class:'field', style:'margin-top:10px;max-width:320px;'}, [el('label',{},'Nhập vào bài học'), lessonSelect]));
+
+  async function ensureLessonExists(){
+    const lessonId = lessonSelect.value || UNSORTED_LESSON_ID;
+    if(!state.lessons.some(l=>l.id===lessonId)){
+      state.lessons.push({id: UNSORTED_LESSON_ID, name:'Chưa phân loại', createdAt: Date.now()});
+      await saveLessons();
+    }
+    return lessonId;
+  }
+
+  // Method 1: upload CSV file
+  const uploadBox = el('div',{class:'import-box'});
+  uploadBox.appendChild(el('h3',{}, 'Cách 1 — Tải lên file CSV (khuyên dùng)'));
+  uploadBox.appendChild(el('p',{class:'hint'}, 'Trong Google Sheet: File → Download → Comma Separated Values (.csv). Sau đó chọn file vừa tải về ở đây.'));
+  const fileInput = el('input',{type:'file', accept:'.csv,text/csv', style:'margin-top:10px;'});
+  const fileStatus = el('div',{class:'hint', style:'margin-top:10px;'});
+  fileInput.addEventListener('change', ()=>{
+    const file = fileInput.files[0];
+    fileStatus.innerHTML = '';
+    if(!file) return;
+    fileStatus.innerHTML = '<span class="spinner"></span>Đang đọc file…';
+    const reader = new FileReader();
+    reader.onload = async (e)=>{
+      const lessonId = await ensureLessonExists();
+      const text = e.target.result;
+      const parsed = Papa.parse(text.trim(), {skipEmptyLines:true});
+      const {added, skipped} = parseAndAddRows(parsed.data, lessonId);
+      await saveVocab();
+      fileStatus.innerHTML = '<span style="color:var(--success)">Đã nhập '+added+' từ mới vào "'+lessonName(lessonId)+'"'+(skipped?(', bỏ qua '+skipped+' từ trùng lặp'):'')+'.</span>';
+      fileInput.value = '';
+      render();
+    };
+    reader.onerror = ()=>{ fileStatus.innerHTML = '<span class="error-text">Không đọc được file. Thử lại với file .csv hợp lệ.</span>'; };
+    reader.readAsText(file, 'UTF-8');
+  });
+  uploadBox.appendChild(fileInput);
+  uploadBox.appendChild(fileStatus);
+  card.appendChild(uploadBox);
+
+  // Method 2: paste data directly
+  const pasteBox = el('div',{class:'import-box', style:'margin-top:16px;'});
+  pasteBox.appendChild(el('h3',{}, 'Cách 2 — Dán dữ liệu trực tiếp'));
+  pasteBox.appendChild(el('p',{class:'hint'}, 'Mở Google Sheet, bôi đen 2 cột (từ + nghĩa), Ctrl+C rồi dán vào ô bên dưới. Mỗi dòng một từ.'));
+  const pasteArea = el('textarea',{rows:'6', placeholder:'apple\tquả táo\nbanana\tquả chuối', style:'margin-top:10px;font-family:JetBrains Mono, monospace;font-size:13px;'});
+  const pasteStatus = el('div',{class:'hint', style:'margin-top:10px;'});
+  const pasteBtn = el('button',{class:'primary', style:'margin-top:4px;'}, 'Phân tích và nhập từ');
+  pasteBtn.addEventListener('click', async ()=>{
+    const text = pasteArea.value.trim();
+    if(!text){ pasteStatus.innerHTML = '<span class="error-text">Dán dữ liệu vào ô trên trước.</span>'; return; }
+    const lessonId = await ensureLessonExists();
+    const parsed = Papa.parse(text, {skipEmptyLines:true, delimiter: text.includes('\t') ? '\t' : (text.includes(',') ? ',' : '\t')});
+    const {added, skipped} = parseAndAddRows(parsed.data, lessonId);
+    await saveVocab();
+    pasteStatus.innerHTML = '<span style="color:var(--success)">Đã nhập '+added+' từ mới vào "'+lessonName(lessonId)+'"'+(skipped?(', bỏ qua '+skipped+' từ trùng lặp'):'')+'.</span>';
+    pasteArea.value = '';
+    render();
+  });
+  pasteBox.appendChild(el('div',{class:'field'}, [pasteArea]));
+  pasteBox.appendChild(pasteBtn);
+  pasteBox.appendChild(pasteStatus);
+  card.appendChild(pasteBox);
+
+  return card;
+}
+
+function buildAccountPanel(){
+  const wrap = el('div',{});
+  const statusLabel = HAS_CLOUD_STORAGE
+    ? 'Đang chạy trong Claude.ai — dữ liệu lưu qua window.storage (dùng chung cho mọi người mở artifact này).'
+    : BACKEND_AVAILABLE
+      ? 'Đã kết nối Vercel KV — dữ liệu lưu chung trên server, mọi người truy cập trang đều thấy cùng một kho từ.'
+      : 'Chưa kết nối được backend (Vercel KV). Dữ liệu đang chỉ lưu tạm trên trình duyệt này (localStorage) — mỗi thiết bị/trình duyệt sẽ có kho từ riêng, không dùng chung được. Xem hướng dẫn kết nối Vercel KV trong file README.md của project.';
+  const statusCard = el('div',{class:'card', style: BACKEND_AVAILABLE || HAS_CLOUD_STORAGE ? '' : 'border-color:var(--pink);'}, [
+    el('h3',{style:'margin-bottom:8px;'}, 'Trạng thái lưu trữ'),
+    el('p',{class:'hint', style:'margin:0;'}, statusLabel),
+  ]);
+  wrap.appendChild(statusCard);
+
+  const card = el('div',{class:'card'});
+  card.appendChild(el('h2',{}, 'Đổi thông tin đăng nhập admin'));
+  card.appendChild(el('p',{class:'hint'}, 'Lưu ý: tài khoản admin dùng chung cho mọi người mở trang này, vì dữ liệu được lưu ở chế độ chia sẻ. Đừng dùng mật khẩu bạn dùng ở nơi khác.'));
+  const userInput = el('input',{type:'text', placeholder:'Tên đăng nhập mới'});
+  const passInput = el('input',{type:'password', placeholder:'Mật khẩu mới'});
+  const errBox = el('div',{class:'error-text', style:'display:none;'});
+  card.appendChild(el('div',{class:'row', style:'margin-top:12px;'}, [
+    el('div',{}, [el('label',{},'Tên đăng nhập'), userInput]),
+    el('div',{}, [el('label',{},'Mật khẩu'), passInput]),
+  ]));
+  card.appendChild(errBox);
+  const btn = el('button',{class:'primary', style:'margin-top:12px;'}, 'Cập nhật tài khoản');
+  btn.addEventListener('click', async ()=>{
+    const u = userInput.value.trim(); const p = passInput.value;
+    if(!u || !p){ errBox.textContent='Nhập đầy đủ tên đăng nhập và mật khẩu mới.'; errBox.style.display='block'; return; }
+    await sset('admin-account', JSON.stringify({username:u, password:p}), true);
+    errBox.style.display='none';
+    setState({toast:'Đã cập nhật tài khoản admin.'});
+  });
+  card.appendChild(btn);
+  wrap.appendChild(card);
+  return wrap;
+}
+
+// ---- student home / quiz setup ----
+function buildStreakCard(){
+  const d = displayStreak();
+  const msg = d.current===0
+    ? 'Luyện tập hôm nay để bắt đầu một chuỗi mới!'
+    : d.practicedToday
+      ? 'Bạn đã luyện tập hôm nay — giữ vững chuỗi nhé!'
+      : 'Luyện tập hôm nay để nối dài chuỗi này!';
+  return el('div',{class:'streak-card'}, [
+    el('div',{class:'streak-flame'}, '🔥'),
+    el('div',{}, [
+      el('div',{class:'streak-num'}, d.current+' ngày liên tiếp'),
+      el('div',{class:'streak-label'}, msg),
+    ]),
+    el('div',{class:'streak-longest'}, ['Kỷ lục: ', el('b',{style:'color:var(--chalk);'}, d.longest+' ngày')]),
+  ]);
+}
+
+function buildStudentHome(){
+  const wrap = el('div',{});
+  wrap.appendChild(buildStreakCard());
+  const card = el('div',{class:'card'});
+  card.appendChild(el('h2',{}, 'Bắt đầu luyện tập'));
+  card.appendChild(el('p',{class:'hint'}, 'Kho từ hiện có ' + state.vocab.length + ' từ. Chọn kiểu kiểm tra bên dưới để bắt đầu.'));
+  if(state.vocab.length < 2){
+    card.appendChild(el('div',{class:'empty'}, [el('span',{html:'<i>Cần ít nhất 2 từ trong kho để tạo bài kiểm tra. Nhờ quản trị viên thêm từ nhé.</i>'})]));
+    wrap.appendChild(card);
+    return wrap;
+  }
+  const btn = el('button',{class:'primary'}, 'Chọn kiểu kiểm tra');
+  btn.addEventListener('click', ()=> setState({screen:'lesson-pick'}));
+  card.appendChild(btn);
+  wrap.appendChild(card);
+  return wrap;
+}
+
+function buildLessonPick(){
+  const wrap = el('div',{});
+  wrap.appendChild(el('button',{class:'small', style:'margin-bottom:14px;', onclick:()=>setState({screen:homeScreenFor()})}, '← Quay lại'));
+  const card = el('div',{class:'card'});
+  card.appendChild(el('h2',{}, 'Chọn bài học để luyện tập'));
+  card.appendChild(el('p',{class:'hint', style:'margin-bottom:6px;'}, 'Chọn một bài cụ thể để tập trung, hoặc luyện toàn bộ kho từ.'));
+
+  const options = [{id:'__all__', name:'Tất cả bài học', count: state.vocab.length}]
+    .concat(state.lessons.slice().sort((a,b)=>a.createdAt-b.createdAt).map(l=>({id:l.id, name:l.name, count: wordsInLesson(l.id).length})));
+
+  const list = el('div',{style:'display:flex;flex-direction:column;gap:10px;margin-top:16px;'});
+  options.forEach(opt=>{
+    const disabled = opt.count < 2;
+    const row = el('button',{
+      style:'display:flex;justify-content:space-between;align-items:center;padding:16px 18px;text-align:left;width:100%;'+(disabled?'opacity:0.45;cursor:not-allowed;':''),
+    }, [
+      el('span',{style:'font-weight:600;'}, opt.name),
+      el('span',{class:'hint', style:'margin:0;'}, opt.count + ' từ'),
+    ]);
+    if(!disabled){
+      row.addEventListener('click', ()=>{
+        setState({selectedLessonId: opt.id, screen:'quiz-setup'});
+      });
+    } else {
+      row.disabled = true;
+    }
+    list.appendChild(row);
+  });
+  card.appendChild(list);
+  if(state.vocab.length===0){
+    card.appendChild(el('div',{class:'empty', style:'margin-top:16px;'}, [el('span',{html:'<i>Kho từ đang trống. Nhờ quản trị viên thêm từ trước nhé.</i>'})]));
+  }
+  wrap.appendChild(card);
+  return wrap;
+}
+
+function buildQuizSetup(){
+  const wrap = el('div',{});
+  wrap.appendChild(el('button',{class:'small', style:'margin-bottom:14px;', onclick:()=>setState({screen:'lesson-pick'})}, '← Đổi bài học'));
+  wrap.appendChild(buildStreakCard());
+  const lessonWords = wordsInLesson(state.selectedLessonId);
+  const lessonLabel = state.selectedLessonId==='__all__' ? 'Tất cả bài học' : lessonName(state.selectedLessonId);
+  const card = el('div',{class:'card'});
+  card.appendChild(el('span',{class:'eyebrow'}, lessonLabel));
+  card.appendChild(el('h2',{style:'margin-top:4px;'}, 'Chọn kiểu học'));
+  const maxQ = Math.min(lessonWords.length, 20);
+  let mode = 'blank';
+  let count = Math.min(10, maxQ);
+
+  const modeRow = el('div',{class:'grid2', style:'margin:18px 0;'});
+  const blankBtn = el('button',{class:'active', style:'padding:18px;text-align:left;'}, [
+    el('div',{style:'font-weight:600;margin-bottom:4px;'}, 'Điền chữ cái còn thiếu'),
+    el('div',{class:'hint', style:'margin:0;'}, 'Xem nghĩa tiếng Việt, gõ lại từ tiếng Anh còn thiếu vài chữ cái.'),
+  ]);
+  const mcBtn = el('button',{style:'padding:18px;text-align:left;'}, [
+    el('div',{style:'font-weight:600;margin-bottom:4px;'}, 'Trắc nghiệm A/B/C/D'),
+    el('div',{class:'hint', style:'margin:0;'}, 'Xem từ tiếng Anh, chọn nghĩa tiếng Việt đúng trong 4 đáp án.'),
+  ]);
+  blankBtn.addEventListener('click', ()=>{ mode='blank'; blankBtn.classList.add('active'); mcBtn.classList.remove('active'); });
+  mcBtn.addEventListener('click', ()=>{ mode='mc'; mcBtn.classList.add('active'); blankBtn.classList.remove('active'); });
+  modeRow.appendChild(blankBtn); modeRow.appendChild(mcBtn);
+  card.appendChild(modeRow);
+
+  if(lessonWords.length < 2){
+    card.appendChild(el('div',{class:'empty'}, [el('span',{html:'<i>Bài học này chưa đủ 2 từ để tạo bài kiểm tra.</i>'})]));
+    wrap.appendChild(card);
+    return wrap;
+  }
+
+  card.appendChild(el('label',{}, 'Số câu hỏi (tối đa ' + maxQ + ')'));
+  const countInput = el('input',{type:'number', min:'1', max:String(maxQ), value:String(count)});
+  countInput.addEventListener('input', ()=>{ count = Math.max(1, Math.min(maxQ, parseInt(countInput.value)||1)); });
+  card.appendChild(el('div',{class:'field'}, [countInput]));
+
+  const startBtn = el('button',{class:'primary', style:'margin-top:6px;'}, 'Bắt đầu kiểm tra');
+  startBtn.addEventListener('click', ()=>{
+    const shuffled = lessonWords.slice().sort(()=>Math.random()-0.5).slice(0, count);
+    setState({
+      screen:'quiz', quizMode:mode, quizWords:shuffled, quizIndex:0,
+      quizAnswers:[], currentInput:'', currentMc:null, answered:false,
+    });
+  });
+  card.appendChild(startBtn);
+  wrap.appendChild(card);
+  return wrap;
+}
+
+// ---- quiz ----
+function maskWord(word){
+  const chars = word.split('');
+  const maskable = chars.map((c,i)=> (i>0 && /[a-zA-Z]/.test(c)) ? i : -1).filter(i=>i>=0);
+  const maskCount = Math.max(1, Math.round(maskable.length*0.45));
+  const shuffled = maskable.slice().sort(()=>Math.random()-0.5).slice(0, maskCount);
+  const maskSet = new Set(shuffled);
+  return chars.map((c,i)=> maskSet.has(i) ? '_' : c).join('');
+}
+
+function buildQuiz(){
+  const total = state.quizWords.length;
+  const idx = state.quizIndex;
+  const item = state.quizWords[idx];
+  const wrap = el('div',{});
+
+  const progress = el('div',{class:'quiz-progress'}, [
+    el('span',{}, (idx+1)+' / '+total),
+    el('div',{class:'progress-bar'}, [el('div',{class:'progress-fill', style:'width:'+((idx)/total*100)+'%'})]),
+  ]);
+  wrap.appendChild(progress);
+
+  const card = el('div',{class:'card question-card'});
+
+  if(state.quizMode==='blank'){
+    if(!buildQuiz._masked || buildQuiz._maskedFor!==item.id){
+      buildQuiz._masked = maskWord(item.word);
+      buildQuiz._maskedFor = item.id;
+    }
+    card.appendChild(el('div',{class:'question-sub'}, 'Nghĩa: ' + item.meaning));
+    card.appendChild(el('div',{class:'question-word'}, buildQuiz._masked));
+    const input = el('input',{class:'blank-input', type:'text', placeholder:'Gõ từ đầy đủ', autocomplete:'off'});
+    input.value = state.currentInput;
+    input.disabled = state.answered;
+    input.addEventListener('input', ()=>{ state.currentInput = input.value; });
+    input.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && !state.answered) submitBlank(item, input.value); });
+    card.appendChild(input);
+    const feedback = el('div',{class:'feedback' + (state.answered ? (state.lastCorrect?' correct':' wrong') : '')});
+    if(state.answered){
+      feedback.textContent = state.lastCorrect ? 'Chính xác!' : 'Chưa đúng — đáp án là "'+item.word+'"';
+    }
+    card.appendChild(feedback);
+    const btn = el('button',{class:'primary', style:'margin-top:20px;'}, state.answered ? (idx+1<total ? 'Câu tiếp theo' : 'Xem kết quả') : 'Kiểm tra');
+    btn.addEventListener('click', ()=>{
+      if(!state.answered){ submitBlank(item, input.value); }
+      else { nextQuestion(); }
+    });
+    card.appendChild(btn);
+    setTimeout(()=>{ if(!state.answered) input.focus(); }, 0);
+  } else {
+    if(!buildQuiz._optionsFor || buildQuiz._optionsFor!==item.id){
+      const pool = state.quizWords.filter(v=>v.id!==item.id);
+      const backupPool = state.vocab.filter(v=>v.id!==item.id && !pool.some(p=>p.id===v.id));
+      const others = pool.concat(backupPool).sort(()=>Math.random()-0.5).slice(0,3);
+      const opts = [item, ...others].sort(()=>Math.random()-0.5).map(v=>v.meaning);
+      buildQuiz._options = opts;
+      buildQuiz._optionsFor = item.id;
+    }
+    card.appendChild(el('div',{class:'question-sub'}, 'Chọn nghĩa đúng của từ:'));
+    card.appendChild(el('div',{class:'question-word'}, item.word));
+    const optWrap = el('div',{class:'mc-options'});
+    const letters = ['A','B','C','D'];
+    buildQuiz._options.forEach((opt, i)=>{
+      const isCorrect = opt === item.meaning;
+      const b = el('button',{class:'mc-btn'}, [
+        el('span',{class:'mc-letter'}, letters[i]),
+        el('span',{}, opt),
+      ]);
+      if(state.answered){
+        if(isCorrect) b.classList.add('correct');
+        else if(opt===state.currentMc) b.classList.add('wrong');
+        b.disabled = true;
+      }
+      b.addEventListener('click', ()=>{
+        if(state.answered) return;
+        state.currentMc = opt;
+        submitMc(item, opt);
+      });
+      optWrap.appendChild(b);
+    });
+    card.appendChild(optWrap);
+    const feedback = el('div',{class:'feedback' + (state.answered ? (state.lastCorrect?' correct':' wrong') : '')});
+    if(state.answered){ feedback.textContent = state.lastCorrect ? 'Chính xác!' : 'Chưa đúng.'; }
+    card.appendChild(feedback);
+    if(state.answered){
+      const btn = el('button',{class:'primary', style:'margin-top:16px;'}, idx+1<total ? 'Câu tiếp theo' : 'Xem kết quả');
+      btn.addEventListener('click', nextQuestion);
+      card.appendChild(btn);
+    }
+  }
+
+  wrap.appendChild(card);
+  return wrap;
+}
+
+function submitBlank(item, value){
+  const correct = value.trim().toLowerCase() === item.word.trim().toLowerCase();
+  state.quizAnswers.push({word:item.word, meaning:item.meaning, correct, given:value});
+  state.answered = true; state.lastCorrect = correct;
+  render();
+}
+function submitMc(item, chosen){
+  const correct = chosen === item.meaning;
+  state.quizAnswers.push({word:item.word, meaning:item.meaning, correct, given:chosen});
+  state.answered = true; state.lastCorrect = correct;
+  render();
+}
+function nextQuestion(){
+  buildQuiz._masked = null; buildQuiz._optionsFor = null;
+  if(state.quizIndex+1 >= state.quizWords.length){
+    finishQuiz();
+  } else {
+    setState({quizIndex: state.quizIndex+1, currentInput:'', currentMc:null, answered:false});
+  }
+}
+
+async function finishQuiz(){
+  await saveProgress();
+  await bumpStreak();
+  setState({screen:'result'});
+}
+
+async function saveProgress(){
+  const correct = state.quizAnswers.filter(a=>a.correct).length;
+  const key = 'progress:' + state.session.name;
+  const raw = await sget(key, true);
+  const history = raw ? JSON.parse(raw) : [];
+  history.push({ date: new Date().toISOString(), mode: state.quizMode, score: correct, total: state.quizAnswers.length });
+  await sset(key, JSON.stringify(history), true);
+}
+
+function buildResult(){
+  const correct = state.quizAnswers.filter(a=>a.correct).length;
+  const total = state.quizAnswers.length;
+  const wrap = el('div',{});
+  wrap.appendChild(buildStreakCard());
+  const card = el('div',{class:'card'});
+  card.appendChild(el('div',{class:'result-score'}, correct+'/'+total));
+  card.appendChild(el('div',{class:'result-sub'}, correct===total ? 'Xuất sắc — bạn nhớ hết!' : 'Tiếp tục luyện tập để nhớ lâu hơn.'));
+  const btnRow = el('div',{style:'display:flex;gap:12px;justify-content:center;margin-bottom:24px;'}, [
+    el('button',{class:'primary', onclick:()=>setState({screen:'lesson-pick'})}, 'Làm bài mới'),
+    el('button',{onclick:()=>setState({screen:homeScreenFor()})}, 'Về trang chính'),
+  ]);
+  card.appendChild(btnRow);
+  card.appendChild(el('h3',{style:'margin-bottom:8px;'}, 'Xem lại'));
+  const reviewWrap = el('div',{});
+  state.quizAnswers.forEach(a=>{
+    reviewWrap.appendChild(el('div',{class:'review-item'}, [
+      el('span',{}, a.word + ' — ' + a.meaning),
+      el('span',{class:'badge ' + (a.correct?'correct':'wrong')}, a.correct ? 'Đúng' : ('Sai: '+(a.given||'(bỏ trống')+')')),
+    ]));
+  });
+  card.appendChild(reviewWrap);
+  wrap.appendChild(card);
+  return wrap;
+}
+
+init();
+</script>
+</body>
+</html>
