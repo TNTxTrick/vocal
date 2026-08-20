@@ -13,8 +13,16 @@ export default async function handler(req, res) {
     if (method === 'GET') {
       const { key, shared, clientId } = req.query;
       if (!key) return res.status(400).json({ error: 'key is required' });
-      // health check ping used by the frontend to detect backend availability
-      if (key === '__health__') return res.status(200).json({ ok: true });
+      // health check: gọi thật vào KV để xác nhận đã kết nối, không chỉ trả về thành công cho có
+      if (key === '__health__') {
+        try {
+          await kv.set('__health_check__', Date.now());
+          return res.status(200).json({ ok: true });
+        } catch (kvErr) {
+          console.error('KV health check failed:', kvErr);
+          return res.status(500).json({ ok: false, error: 'KV chưa kết nối hoặc thiếu biến môi trường', detail: String(kvErr && kvErr.message || kvErr) });
+        }
+      }
       const fullKey = buildKey(key, shared, clientId);
       const value = await kv.get(fullKey);
       return res.status(200).json({ value: value === undefined ? null : value });
